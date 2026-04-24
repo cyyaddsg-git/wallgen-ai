@@ -469,6 +469,8 @@
     return [...document.querySelectorAll('.tag.active')].map(t => t.textContent).join(', ');
   }
 
+  let activeRequest = null;
+
   function generate() {
     const promptVal = document.getElementById('prompt').value.trim();
     if (!promptVal) {
@@ -481,54 +483,60 @@
     const encoded = encodeURIComponent(fullPrompt);
     const seed = Math.floor(Math.random() * 999999);
 
-    currentUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
+    const apiUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
 
-    const wrap = document.getElementById('result-wrap');
     const img = document.getElementById('result-img');
     const loading = document.getElementById('loading');
     const loadingText = loading.querySelector('.loading-text');
     const btn = document.getElementById('generate-btn');
     const contentAd = document.getElementById('content-ad');
 
-    wrap.classList.add('visible');
+    // Cancel any previous in-flight request
+    if (activeRequest) activeRequest.cancelled = true;
+    const req = { cancelled: false };
+    activeRequest = req;
+
+    document.getElementById('result-wrap').classList.add('visible');
     loading.classList.remove('hidden');
     img.classList.remove('loaded');
+    img.src = '';
     btn.disabled = true;
     btn.textContent = 'Generating…';
 
-    // Animated loading messages so user knows it's working
     const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…', 'Rendering final image…'];
     let mi = 0;
     loadingText.textContent = messages[0];
-    const msgTimer = setInterval(() => { mi = (mi+1) % messages.length; loadingText.textContent = messages[mi]; }, 3000);
+    const msgTimer = setInterval(() => { mi = (mi+1) % messages.length; loadingText.textContent = messages[mi]; }, 3500);
 
-    // Remove crossOrigin so browser loads it like a normal <img>
-    img.removeAttribute('crossorigin');
-    img.onload = null;
-    img.onerror = null;
+    const reset = () => { clearInterval(msgTimer); btn.disabled = false; btn.textContent = 'Generate ✦'; };
 
-    const newImg = new Image();
+    // Fetch as blob — guarantees img.onload always fires fresh, no cache stale issues
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
 
-    const done = (success) => {
-      clearInterval(msgTimer);
-      btn.disabled = false;
-      btn.textContent = 'Generate ✦';
-      if (success) {
-        img.src = currentUrl;
-        loading.classList.add('hidden');
-        img.classList.add('loaded');
-        contentAd.style.display = 'flex';
-      } else {
-        loadingText.textContent = 'Failed to generate. Please try again.';
-      }
-    };
-
-    // Pollinations can take 20-40s for large resolutions
-    const timeout = setTimeout(() => { newImg.src = ''; done(false); }, 90000);
-
-    newImg.onload = () => { clearTimeout(timeout); done(true); };
-    newImg.onerror = () => { clearTimeout(timeout); done(false); };
-    newImg.src = currentUrl;
+    fetch(apiUrl, { signal: controller.signal })
+      .then(r => { if (!r.ok) throw new Error('bad'); return r.blob(); })
+      .then(blob => {
+        clearTimeout(timeout);
+        if (req.cancelled) return;
+        const blobUrl = URL.createObjectURL(blob);
+        img.onload = () => {
+          reset();
+          loading.classList.add('hidden');
+          img.classList.add('loaded');
+          contentAd.style.display = 'flex';
+        };
+        img.src = blobUrl;
+        currentUrl = blobUrl;
+      })
+      .catch(err => {
+        clearTimeout(timeout);
+        if (req.cancelled) return;
+        reset();
+        loadingText.textContent = err.name === 'AbortError'
+          ? 'Timed out — try lower resolution or simpler prompt.'
+          : 'Failed to generate. Please try again.';
+      });
   }
 
   async function downloadImg() {
