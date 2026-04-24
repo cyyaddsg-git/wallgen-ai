@@ -176,6 +176,28 @@
     color: var(--accent2);
   }
 
+  /* Locked state — applied to all inputs during generation */
+  .locked {
+    pointer-events: none;
+    opacity: 0.4;
+    filter: grayscale(40%);
+    transition: opacity 0.2s, filter 0.2s;
+  }
+  input.locked { background: var(--surface); }
+
+  #generate-btn.stopping {
+    background: #d85a30;
+  }
+  #generate-btn.stopping:hover { background: #f06d3d; }
+
+  .style-warning {
+    font-size: 0.75rem;
+    color: #f5a742;
+    margin-top: 0.6rem;
+    display: none;
+  }
+  .style-warning.visible { display: block; }
+
   .hint {
     font-size: 0.75rem;
     color: var(--muted);
@@ -314,7 +336,7 @@
     <div class="card">
       <div class="input-group">
         <input type="text" id="prompt" placeholder="e.g. misty mountain forest at golden hour" autocomplete="off">
-        <button id="generate-btn" onclick="generate()">Generate ✦</button>
+        <button id="generate-btn" onclick="handleGenerateClick()">Generate ✦</button>
       </div>
 
       <div class="res-label">Resolution</div>
@@ -338,6 +360,7 @@
         <span class="tag">Lo-fi</span>
         <span class="tag">Abstract</span>
       </div>
+      <p class="style-warning" id="style-warning">⚠️ Multiple styles make generation much slower. Pick one for best speed.</p>
 
       <p class="hint">💡 Lower resolution = faster. HD ~10s · FHD ~20s · QHD ~35s</p>
     </div>
@@ -353,7 +376,7 @@
         <img id="result-img" alt="AI generated wallpaper">
       </div>
       <div class="result-actions">
-        <button class="action-btn" id="regen-btn" onclick="generate()">↺ Regenerate</button>
+        <button class="action-btn" id="regen-btn" onclick="handleGenerateClick()">↺ Regenerate</button>
         <button class="action-btn primary" id="download-btn" onclick="downloadImg()">↓ Download</button>
       </div>
     </div>
@@ -387,9 +410,13 @@
     });
   });
 
-  // Style tags
+  // Style tags with warning when 2+ selected
   document.querySelectorAll('.tag').forEach(tag => {
-    tag.addEventListener('click', () => tag.classList.toggle('active'));
+    tag.addEventListener('click', () => {
+      tag.classList.toggle('active');
+      const count = document.querySelectorAll('.tag.active').length;
+      document.getElementById('style-warning').classList.toggle('visible', count >= 2);
+    });
   });
 
   // Enter key triggers generate
@@ -404,6 +431,58 @@
   function buildPrompt(base) {
     const styles = getActiveStyles();
     return styles ? `${base}, ${styles}` : base;
+  }
+
+  // Button click handler — toggles between Generate and Stop
+  function handleGenerateClick() {
+    if (activeGeneration && !activeGeneration.cancelled) {
+      stopGeneration();
+    } else {
+      generate();
+    }
+  }
+
+  // Lock/unlock all inputs except Stop button during generation
+  function setInputsLocked(locked) {
+    const promptInput = document.getElementById('prompt');
+    const resGrid = document.getElementById('res-grid');
+    const tagsEl = document.getElementById('tags');
+    const downloadBtn = document.getElementById('download-btn');
+
+    if (locked) {
+      promptInput.classList.add('locked');
+      promptInput.setAttribute('readonly', 'true');
+      resGrid.classList.add('locked');
+      tagsEl.classList.add('locked');
+      downloadBtn.classList.add('locked');
+    } else {
+      promptInput.classList.remove('locked');
+      promptInput.removeAttribute('readonly');
+      resGrid.classList.remove('locked');
+      tagsEl.classList.remove('locked');
+      downloadBtn.classList.remove('locked');
+    }
+  }
+
+  function stopGeneration() {
+    if (!activeGeneration) return;
+    activeGeneration.cancelled = true;
+    if (activeGeneration.controller) activeGeneration.controller.abort();
+    activeGeneration = null;
+
+    const btn = document.getElementById('generate-btn');
+    const regenBtn = document.getElementById('regen-btn');
+    const loadingText = document.getElementById('loading-text');
+    const loadingTimer = document.getElementById('loading-timer');
+
+    btn.disabled = false;
+    btn.classList.remove('stopping');
+    btn.textContent = 'Generate ✦';
+    regenBtn.disabled = false;
+    regenBtn.textContent = '↺ Regenerate';
+    loadingText.textContent = 'Stopped';
+    loadingTimer.textContent = '';
+    setInputsLocked(false);
   }
 
   async function generate() {
@@ -429,14 +508,17 @@
     const btn = document.getElementById('generate-btn');
     const regenBtn = document.getElementById('regen-btn');
 
-    // Reset UI
+    // Reset UI & lock inputs
     document.getElementById('result-wrap').classList.add('visible');
     loading.classList.remove('hidden');
     img.classList.remove('loaded');
     img.src = '';
-    btn.disabled = true;
-    regenBtn.disabled = true;
-    btn.textContent = 'Generating…';
+    btn.classList.add('stopping');
+    btn.textContent = '■ Stop';
+    btn.disabled = false;
+    regenBtn.textContent = '■ Stop';
+    regenBtn.disabled = false;
+    setInputsLocked(true);
 
     // Start timer — shows user the actual elapsed time
     const startTime = Date.now();
@@ -452,8 +534,12 @@
     const cleanup = () => {
       clearInterval(timerInterval);
       btn.disabled = false;
-      regenBtn.disabled = false;
+      btn.classList.remove('stopping');
       btn.textContent = 'Generate ✦';
+      regenBtn.disabled = false;
+      regenBtn.textContent = '↺ Regenerate';
+      setInputsLocked(false);
+      activeGeneration = null;
     };
 
     // Build Pollinations URL — using turbo model for faster generation
@@ -461,8 +547,8 @@
     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=turbo`;
 
     try {
-      // 90-second hard timeout
-      const timeoutId = setTimeout(() => gen.controller.abort(), 90000);
+      // 45-second hard timeout — don't let users suffer past this
+      const timeoutId = setTimeout(() => gen.controller.abort(), 45000);
 
       const response = await fetch(url, { signal: gen.controller.signal });
       clearTimeout(timeoutId);
@@ -504,7 +590,12 @@
       if (gen.cancelled) return;
       cleanup();
       if (err.name === 'AbortError') {
-        loadingText.textContent = 'Timed out. Try HD resolution.';
+        const styleCount = document.querySelectorAll('.tag.active').length;
+        if (styleCount >= 2) {
+          loadingText.textContent = 'Timed out. Try removing extra styles.';
+        } else {
+          loadingText.textContent = 'Timed out. Try HD resolution.';
+        }
         loadingTimer.textContent = '';
       } else if (err.message === 'rate_limit') {
         loadingText.textContent = 'Server busy — wait 10s and retry';
