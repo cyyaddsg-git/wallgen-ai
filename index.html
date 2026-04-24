@@ -365,8 +365,12 @@
 </header>
 
 <!-- Top leaderboard ad -->
-<div class="ad-banner" style="min-height:90px;">
-  <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px;" data-ad-client="ca-pub-3207104160733357" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+<div class="ad-banner" style="min-height:90px; width:100%; display:block;">
+  <ins class="adsbygoogle"
+    style="display:block; min-height:90px;"
+    data-ad-client="ca-pub-3207104160733357"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
@@ -422,17 +426,22 @@
       </div>
     </div>
 
-<!-- In-content ad -->
-<div class="ad-banner" id="content-ad" style="border-radius:12px; margin: 0 auto 2rem; max-width:680px; display:none; min-height:90px;">
-  <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px;" data-ad-client="ca-pub-3207104160733357" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+<!-- In-content ad — hidden via visibility, not display:none, so AdSense can measure it -->
+<div id="content-ad" style="border-radius:12px; margin: 0 auto 2rem; max-width:680px; min-height:90px; visibility:hidden; width:100%;">
+  <ins class="adsbygoogle"
+    style="display:block; min-height:90px;"
+    data-ad-client="ca-pub-3207104160733357"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
 </div>
   </main>
 
-  <!-- Sidebar ad (160×600) -->
-  <aside class="side-ad">
-    <ins class="adsbygoogle" style="display:block;width:160px;min-height:600px;" data-ad-client="ca-pub-3207104160733357" data-ad-slot="auto" data-ad-format="auto"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  <!-- Sidebar ad (160×600) — only shown on desktop -->
+  <aside class="side-ad" id="side-ad">
+    <ins class="adsbygoogle"
+      style="display:inline-block; width:160px; height:600px;"
+      data-ad-client="ca-pub-3207104160733357"
+      data-ad-format="auto"></ins>
   </aside>
 </div>
 
@@ -444,8 +453,9 @@
 <script>
   let currentW = 1920, currentH = 1080;
   let currentUrl = '';
-  let prefetchedBlob = null;   // pre-loaded next image blob
-  let prefetchAbort = null;    // so we can cancel stale prefetch
+  let prefetchedBlob = null;
+  let prefetchAbort = null;
+  let prefetchTimer = null;
 
   document.querySelectorAll('.res-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -453,14 +463,14 @@
       btn.classList.add('active');
       currentW = parseInt(btn.dataset.w);
       currentH = parseInt(btn.dataset.h);
-      prefetchedBlob = null; // resolution changed, discard prefetch
+      prefetchedBlob = null;
     });
   });
 
   document.querySelectorAll('.tag').forEach(tag => {
     tag.addEventListener('click', () => {
       tag.classList.toggle('active');
-      prefetchedBlob = null; // style changed, discard prefetch
+      prefetchedBlob = null;
     });
   });
 
@@ -472,23 +482,68 @@
     return [...document.querySelectorAll('.tag.active')].map(t => t.textContent).join(', ');
   }
 
-  function buildUrl(prompt) {
+  function buildPrompt(base) {
     const styles = getActiveStyles();
-    const full = styles ? `${prompt}, ${styles} style` : prompt;
+    return styles ? `${base}, ${styles} style` : base;
+  }
+
+  // ── Multiple free providers — race them all, first one wins ──
+  function getProviderUrls(prompt) {
+    const enc = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 999999);
-    return `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
+    const w = currentW, h = currentH;
+    return [
+      // Provider 1: Pollinations flux (best quality)
+      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`,
+      // Provider 2: Pollinations turbo (faster, lower quality)
+      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed+1}&nologo=true&model=turbo`,
+      // Provider 3: Pollinations with different seed as tie-breaker
+      `https://image.pollinations.ai/prompt/${enc}?width=${Math.min(w,1920)}&height=${Math.min(h,1080)}&seed=${seed+2}&nologo=true&model=flux-realism`,
+    ];
+  }
+
+  // Race all providers — returns blob from whichever responds first successfully
+  function raceProviders(prompt, signal) {
+    const urls = getProviderUrls(prompt);
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      let failures = 0;
+
+      urls.forEach((url, i) => {
+        // Stagger requests slightly to avoid simultaneous rate-limit hits
+        setTimeout(() => {
+          if (settled) return;
+          fetch(url, { signal })
+            .then(r => {
+              if (!r.ok) throw new Error(`${r.status}`);
+              return r.blob();
+            })
+            .then(blob => {
+              if (!settled) {
+                settled = true;
+                resolve(blob);
+              }
+            })
+            .catch(err => {
+              if (settled) return;
+              failures++;
+              if (failures === urls.length) reject(err);
+            });
+        }, i * 2000); // stagger: 0s, 2s, 4s
+      });
+    });
   }
 
   function prefetchNext(prompt) {
-    // cancel any existing prefetch
+    if (prefetchTimer) clearTimeout(prefetchTimer);
     if (prefetchAbort) prefetchAbort.abort();
-    prefetchAbort = new AbortController();
     prefetchedBlob = null;
-    const url = buildUrl(prompt);
-    fetch(url, { signal: prefetchAbort.signal })
-      .then(r => r.ok ? r.blob() : null)
-      .then(blob => { if (blob) prefetchedBlob = blob; })
-      .catch(() => {}); // silent — it's just a prefetch
+    prefetchTimer = setTimeout(() => {
+      prefetchAbort = new AbortController();
+      raceProviders(prompt, prefetchAbort.signal)
+        .then(blob => { prefetchedBlob = blob; })
+        .catch(() => {});
+    }, 6000); // wait 6s after last generation before prefetching
   }
 
   let activeReq = null;
@@ -497,11 +552,11 @@
     const promptVal = document.getElementById('prompt').value.trim();
     if (!promptVal) { document.getElementById('prompt').focus(); return; }
 
+    const fullPrompt = buildPrompt(promptVal);
     const img = document.getElementById('result-img');
     const loading = document.getElementById('loading');
     const loadingText = loading.querySelector('.loading-text');
     const btn = document.getElementById('generate-btn');
-    const contentAd = document.getElementById('content-ad');
 
     if (activeReq) activeReq.cancelled = true;
     const req = { cancelled: false };
@@ -514,10 +569,16 @@
     btn.disabled = true;
     btn.textContent = 'Generating…';
 
-    const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…', 'Rendering final image…'];
+    const messages = [
+      'Generating your wallpaper…',
+      'Running AI model…',
+      'Trying faster server…',
+      'Almost ready…',
+      'Finalizing image…'
+    ];
     let mi = 0;
     loadingText.textContent = messages[0];
-    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 3500);
+    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 5000);
     const reset = () => { clearInterval(msgTimer); btn.disabled=false; btn.textContent='Generate ✦'; };
 
     const showBlob = (blob) => {
@@ -527,36 +588,40 @@
         reset();
         loading.classList.add('hidden');
         img.classList.add('loaded');
-        contentAd.style.display = 'flex';
-        // Start prefetching the NEXT image in background immediately
-        prefetchNext(promptVal);
+        document.getElementById('content-ad').style.visibility = 'visible';
+        prefetchNext(fullPrompt);
       };
       img.src = blobUrl;
       currentUrl = blobUrl;
     };
 
-    // If we already have a prefetched blob ready — use it instantly!
+    // Use prefetched blob instantly if available
     if (prefetchedBlob) {
       const blob = prefetchedBlob;
       prefetchedBlob = null;
-      clearInterval(msgTimer); // no spinner needed
+      clearInterval(msgTimer);
       showBlob(blob);
       return;
     }
 
-    // Otherwise fetch normally
+    // Race all providers with 30s hard timeout
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90000);
-    fetch(buildUrl(promptVal), { signal: controller.signal })
-      .then(r => { if (!r.ok) throw new Error('bad'); return r.blob(); })
-      .then(blob => { clearTimeout(timeout); showBlob(blob); })
+    const hardTimeout = setTimeout(() => {
+      controller.abort();
+    }, 30000);
+
+    raceProviders(fullPrompt, controller.signal)
+      .then(blob => {
+        clearTimeout(hardTimeout);
+        showBlob(blob);
+      })
       .catch(err => {
-        clearTimeout(timeout);
+        clearTimeout(hardTimeout);
         if (req.cancelled) return;
         reset();
         loadingText.textContent = err.name === 'AbortError'
-          ? 'Timed out — try lower resolution or simpler prompt.'
-          : 'Failed to generate. Please try again.';
+          ? 'Timed out after 30s. Try a simpler prompt or lower resolution.'
+          : 'All servers busy. Please try again in a moment.';
       });
   }
 
@@ -571,6 +636,21 @@
       window.open(currentUrl, '_blank');
     }
   }
+
+  // Init ads after page fully renders so AdSense can measure widths correctly
+  window.addEventListener('load', () => {
+    // Top banner — always visible, push immediately
+    (adsbygoogle = window.adsbygoogle || []).push({});
+
+    // Sidebar — only on desktop (width >= 960px)
+    if (window.innerWidth >= 960) {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+
+    // In-content ad — push now (it's in DOM, just visibility:hidden)
+    // AdSense can measure it; it will show when visibility turns visible
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  });
 </script>
 </body>
 </html>
