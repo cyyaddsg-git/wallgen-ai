@@ -244,6 +244,16 @@
   </nav>
 </header>
 
+<!-- Top leaderboard ad -->
+<div style="width:100%; min-height:90px; text-align:center; padding:8px 0; background:var(--surface); border-bottom:1px solid var(--border);">
+  <ins class="adsbygoogle"
+    style="display:block; min-height:90px;"
+    data-ad-client="ca-pub-3207104160733357"
+    data-ad-slot="auto"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+</div>
+
 <section class="hero">
   <h1>Free <em>ready-to-download</em> wallpapers</h1>
   <p>60+ hand-picked AI wallpapers, organized by style. All 1920×1080, free to use.</p>
@@ -281,6 +291,7 @@
 
     // Build category sections
     main.innerHTML = '';
+    let catIndex = 0;
     for (const cat of data.categories) {
       const section = document.createElement('section');
       section.className = 'category';
@@ -319,7 +330,27 @@
       section.innerHTML = header;
       section.appendChild(grid);
       main.appendChild(section);
+
+      // Insert ad after 2nd category (natural break)
+      catIndex++;
+      if (catIndex === 2) {
+        const adDiv = document.createElement('div');
+        adDiv.style.cssText = 'margin: 2rem auto 3rem; max-width:900px; min-height:100px;';
+        adDiv.innerHTML = `
+          <ins class="adsbygoogle"
+            style="display:block; min-height:100px;"
+            data-ad-client="ca-pub-3207104160733357"
+            data-ad-slot="auto"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        `;
+        main.appendChild(adDiv);
+        try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+      }
     }
+
+    // Push the top banner ad now that page is laid out
+    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
 
     // Filter logic
     filterBar.addEventListener('click', (e) => {

@@ -326,6 +326,16 @@
   </nav>
 </header>
 
+<!-- Top leaderboard ad -->
+<div style="width:100%; min-height:90px; text-align:center; padding:8px 0; background:var(--surface); border-bottom:1px solid var(--border);">
+  <ins class="adsbygoogle"
+    style="display:block; min-height:90px;"
+    data-ad-client="ca-pub-3207104160733357"
+    data-ad-slot="auto"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+</div>
+
 <div class="layout">
   <main>
     <section class="hero">
@@ -379,6 +389,16 @@
         <button class="action-btn" id="regen-btn" onclick="handleGenerateClick()">↺ Regenerate</button>
         <button class="action-btn primary" id="download-btn" onclick="downloadImg()">↓ Download</button>
       </div>
+    </div>
+
+    <!-- In-content ad -->
+    <div style="max-width:680px; margin:0 auto 2rem; min-height:100px;">
+      <ins class="adsbygoogle"
+        style="display:block; min-height:100px;"
+        data-ad-client="ca-pub-3207104160733357"
+        data-ad-slot="auto"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
     </div>
   </main>
 
@@ -617,8 +637,13 @@
     document.body.removeChild(a);
   }
 
-  // Init sidebar ad (desktop only)
+  // Init ads after page fully loads so AdSense can measure widths correctly
   window.addEventListener('load', () => {
+    // Top banner (always visible)
+    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+    // In-content ad
+    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+    // Sidebar (desktop only)
     if (window.innerWidth >= 960) {
       try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
     }
