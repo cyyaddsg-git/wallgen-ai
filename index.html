@@ -9,6 +9,9 @@
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3207104160733357" crossorigin="anonymous"></script>
 
+<!-- Puter.js — free image generation, no API key, no rate limits -->
+<script src="https://js.puter.com/v2/"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -436,9 +439,6 @@
 <script>
   let currentW = 1920, currentH = 1080;
   let currentUrl = '';
-  let prefetchedBlob = null;
-  let prefetchAbort = null;
-  let prefetchTimer = null;
 
   document.querySelectorAll('.res-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -446,15 +446,11 @@
       btn.classList.add('active');
       currentW = parseInt(btn.dataset.w);
       currentH = parseInt(btn.dataset.h);
-      prefetchedBlob = null;
     });
   });
 
   document.querySelectorAll('.tag').forEach(tag => {
-    tag.addEventListener('click', () => {
-      tag.classList.toggle('active');
-      prefetchedBlob = null;
-    });
+    tag.addEventListener('click', () => tag.classList.toggle('active'));
   });
 
   document.getElementById('prompt').addEventListener('keydown', e => {
@@ -470,67 +466,35 @@
     return styles ? `${base}, ${styles} style` : base;
   }
 
-  // ── Multiple free providers — race them all, first one wins ──
-  function getProviderUrls(prompt) {
-    const enc = encodeURIComponent(prompt);
-    const seed = Math.floor(Math.random() * 999999);
-    const w = currentW, h = currentH;
-    return [
-      // Provider 1: flux — best quality
-      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`,
-      // Provider 2: turbo — much faster, slightly lower quality
-      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed+1}&nologo=true&model=turbo`,
-      // Provider 3: flux via gen endpoint — different server, avoids same rate limit
-      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed+2}&nologo=true&model=flux&nofeed=true`,
-    ];
-  }
+  // ── Primary: Puter.js with FLUX Schnell (1-2s, no rate limits) ──
+  // ── Fallback: Pollinations.ai turbo model ──
 
-  // Race all providers — returns blob from whichever responds first successfully
-  function raceProviders(prompt, signal) {
-    const urls = getProviderUrls(prompt);
+  async function generateViaPuter(prompt) {
+    // Puter returns an <img> element. Wait for it to fully load.
+    const imgEl = await puter.ai.txt2img(prompt, {
+      model: 'black-forest-labs/flux-1.schnell'
+    });
+    // The returned img may already be loaded; return its src (blob or data URL)
+    if (imgEl.complete && imgEl.naturalWidth > 0) return imgEl.src;
     return new Promise((resolve, reject) => {
-      let settled = false;
-      let failures = 0;
-
-      urls.forEach((url, i) => {
-        setTimeout(() => {
-          if (settled) return;
-          fetch(url, { signal })
-            .then(r => {
-              // 429 = rate limited, treat as soft failure (not a hard error)
-              if (r.status === 429 || r.status === 503) throw new Error(`${r.status}`);
-              if (!r.ok) throw new Error(`${r.status}`);
-              return r.blob();
-            })
-            .then(blob => {
-              if (!settled) { settled = true; resolve(blob); }
-            })
-            .catch(err => {
-              if (settled) return;
-              failures++;
-              // Only reject if ALL providers failed
-              if (failures === urls.length) reject(err);
-            });
-        }, i * 1500); // stagger: 0s, 1.5s, 3s
-      });
+      imgEl.onload = () => resolve(imgEl.src);
+      imgEl.onerror = () => reject(new Error('Puter img failed to load'));
     });
   }
 
-  function prefetchNext(prompt) {
-    if (prefetchTimer) clearTimeout(prefetchTimer);
-    if (prefetchAbort) prefetchAbort.abort();
-    prefetchedBlob = null;
-    prefetchTimer = setTimeout(() => {
-      prefetchAbort = new AbortController();
-      raceProviders(prompt, prefetchAbort.signal)
-        .then(blob => { prefetchedBlob = blob; })
-        .catch(() => {});
-    }, 6000); // wait 6s after last generation before prefetching
+  async function generateViaPollinations(prompt, signal) {
+    const enc = encodeURIComponent(prompt);
+    const seed = Math.floor(Math.random() * 999999);
+    const url = `https://image.pollinations.ai/prompt/${enc}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=turbo`;
+    const res = await fetch(url, { signal });
+    if (!res.ok) throw new Error(`Pollinations ${res.status}`);
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
   }
 
   let activeReq = null;
 
-  function generate() {
+  async function generate() {
     const promptVal = document.getElementById('prompt').value.trim();
     if (!promptVal) { document.getElementById('prompt').focus(); return; }
 
@@ -551,83 +515,64 @@
     btn.disabled = true;
     btn.textContent = 'Generating…';
 
-    const messages = [
-      'Generating your wallpaper…',
-      'Running AI model…',
-      'Trying faster server…',
-      'Almost ready…',
-      'Finalizing image…'
-    ];
+    const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…'];
     let mi = 0;
     loadingText.textContent = messages[0];
-    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 5000);
+    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 3000);
     const reset = () => { clearInterval(msgTimer); btn.disabled=false; btn.textContent='Generate ✦'; };
 
-    const showBlob = (blob) => {
+    const displayUrl = (url) => {
       if (req.cancelled) return;
-      const blobUrl = URL.createObjectURL(blob);
       img.onload = () => {
         reset();
         loading.classList.add('hidden');
         img.classList.add('loaded');
-        prefetchNext(fullPrompt);
       };
-      img.src = blobUrl;
-      currentUrl = blobUrl;
+      img.src = url;
+      currentUrl = url;
     };
 
-    // Use prefetched blob instantly if available
-    if (prefetchedBlob) {
-      const blob = prefetchedBlob;
-      prefetchedBlob = null;
-      clearInterval(msgTimer);
-      showBlob(blob);
-      return;
-    }
-
-    // Keep retrying every 5s until 30s total — so user always gets a result
-    const deadline = Date.now() + 30000;
-
-    function tryGenerate() {
-      if (req.cancelled) return;
-      const timeLeft = deadline - Date.now();
-      if (timeLeft <= 0) {
-        reset();
-        loadingText.textContent = 'Timed out. Please try again.';
-        return;
+    try {
+      // Try Puter first (fastest, no rate limits)
+      if (typeof puter !== 'undefined' && puter.ai) {
+        try {
+          const url = await generateViaPuter(fullPrompt);
+          if (!req.cancelled) { displayUrl(url); return; }
+        } catch (puterErr) {
+          console.warn('Puter failed, falling back to Pollinations:', puterErr);
+          loadingText.textContent = 'Switching to backup server…';
+        }
       }
+
+      // Fallback: Pollinations turbo
       const controller = new AbortController();
-      const perAttemptTimeout = setTimeout(() => controller.abort(), Math.min(timeLeft, 25000));
-
-      raceProviders(fullPrompt, controller.signal)
-        .then(blob => {
-          clearTimeout(perAttemptTimeout);
-          showBlob(blob);
-        })
-        .catch(err => {
-          clearTimeout(perAttemptTimeout);
-          if (req.cancelled) return;
-          if (err.name === 'AbortError' || Date.now() >= deadline) {
-            reset();
-            loadingText.textContent = 'Timed out. Please try again.';
-          } else {
-            // Failed but still have time — retry in 3s
-            loadingText.textContent = 'Server busy, retrying…';
-            setTimeout(tryGenerate, 3000);
-          }
-        });
+      const timeout = setTimeout(() => controller.abort(), 25000);
+      try {
+        const url = await generateViaPollinations(fullPrompt, controller.signal);
+        clearTimeout(timeout);
+        if (!req.cancelled) displayUrl(url);
+      } catch (pollErr) {
+        clearTimeout(timeout);
+        throw pollErr;
+      }
+    } catch (err) {
+      if (req.cancelled) return;
+      reset();
+      loadingText.textContent = 'Generation failed. Please try again.';
+      console.error(err);
     }
-
-    tryGenerate();
   }
 
   async function downloadImg() {
     if (!currentUrl) return;
     try {
+      // If it's a blob or data URL, direct download works
       const a = document.createElement('a');
       a.href = currentUrl;
       a.download = `wallgen-ai-${currentW}x${currentH}.jpg`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     } catch {
       window.open(currentUrl, '_blank');
     }
@@ -636,7 +581,7 @@
   // Init only sidebar ad
   window.addEventListener('load', () => {
     if (window.innerWidth >= 960) {
-      (adsbygoogle = window.adsbygoogle || []).push({});
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
     }
   });
 </script>
