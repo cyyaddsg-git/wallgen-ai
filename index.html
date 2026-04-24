@@ -9,9 +9,6 @@
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3207104160733357" crossorigin="anonymous"></script>
 
-<!-- Puter.js — free image generation, no API key, no rate limits -->
-<script src="https://js.puter.com/v2/"></script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -39,7 +36,6 @@
     min-height: 100vh;
   }
 
-  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
@@ -71,27 +67,7 @@
   }
   nav a:hover { color: var(--text); }
 
-  /* ── Ad banner slot ── */
-  .ad-banner {
-    width: 100%;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 90px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  /* Replace the placeholder div with: <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> */
-
-  /* ── Hero ── */
-  .hero {
-    text-align: center;
-    padding: 4rem 1rem 2rem;
-  }
+  .hero { text-align: center; padding: 4rem 1rem 2rem; }
 
   .hero h1 {
     font-family: 'DM Serif Display', serif;
@@ -100,21 +76,16 @@
     letter-spacing: -0.03em;
     margin-bottom: 0.75rem;
   }
-
-  .hero h1 em {
-    font-style: italic;
-    color: var(--accent2);
-  }
+  .hero h1 em { font-style: italic; color: var(--accent2); }
 
   .hero p {
     color: var(--muted);
     font-size: 1rem;
-    max-width: 480px;
+    max-width: 520px;
     margin: 0 auto 2.5rem;
     line-height: 1.6;
   }
 
-  /* ── Main card ── */
   .card {
     max-width: 680px;
     margin: 0 auto 2rem;
@@ -124,11 +95,7 @@
     padding: 2rem;
   }
 
-  .input-group {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-  }
+  .input-group { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
 
   #prompt {
     flex: 1;
@@ -158,15 +125,11 @@
     white-space: nowrap;
     transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   }
-  #generate-btn:hover {
-    background: var(--accent2);
-    box-shadow: 0 0 24px var(--accent-glow);
-  }
+  #generate-btn:hover { background: var(--accent2); box-shadow: 0 0 24px var(--accent-glow); }
   #generate-btn:active { transform: scale(0.97); }
   #generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* ── Resolution grid ── */
-  .res-label {
+  .res-label, .tags-label {
     font-size: 0.78rem;
     color: var(--muted);
     text-transform: uppercase;
@@ -174,12 +137,7 @@
     margin-bottom: 0.6rem;
   }
 
-  .res-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
+  .res-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
 
   .res-btn {
     background: var(--surface2);
@@ -199,19 +157,7 @@
     color: var(--accent2);
   }
 
-  /* ── Style tags ── */
-  .tags-label {
-    font-size: 0.78rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.6rem;
-  }
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .tag {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -230,12 +176,15 @@
     color: var(--accent2);
   }
 
-  /* ── Result area ── */
-  .result-wrap {
-    max-width: 680px;
-    margin: 0 auto 3rem;
-    display: none;
+  .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.5;
   }
+
+  .result-wrap { max-width: 680px; margin: 0 auto 3rem; display: none; }
   .result-wrap.visible { display: block; }
 
   .result-img-container {
@@ -244,7 +193,7 @@
     overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--border);
-    min-height: 220px;
+    min-height: 260px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -266,8 +215,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.8rem;
     background: var(--surface);
+    padding: 2rem;
+    text-align: center;
   }
   .loading-overlay.hidden { display: none; }
 
@@ -278,19 +229,15 @@
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+    margin-bottom: 0.3rem;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .loading-text {
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
+  .loading-text { color: var(--text); font-size: 0.95rem; font-weight: 400; }
+  .loading-timer { color: var(--accent2); font-size: 1.4rem; font-weight: 500; font-family: 'DM Serif Display', serif; }
+  .loading-sub { color: var(--muted); font-size: 0.75rem; margin-top: 0.3rem; }
 
-  .result-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
+  .result-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
 
   .action-btn {
     flex: 1;
@@ -304,16 +251,16 @@
     cursor: pointer;
     transition: all 0.15s;
   }
-  .action-btn:hover { border-color: var(--accent); background: rgba(157,125,255,0.08); }
+  .action-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(157,125,255,0.08); }
   .action-btn.primary {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
     font-weight: 500;
   }
-  .action-btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .action-btn.primary:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
+  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── Side ad slot ── */
   .layout {
     display: grid;
     grid-template-columns: 1fr;
@@ -331,22 +278,12 @@
     .side-ad {
       position: sticky;
       top: 80px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
       min-height: 600px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
       margin-top: 2rem;
     }
   }
+  @media (max-width: 959px) { .side-ad { display: none; } }
 
-  /* ── Footer ── */
   footer {
     border-top: 1px solid var(--border);
     padding: 2rem;
@@ -367,12 +304,11 @@
   </nav>
 </header>
 
-
 <div class="layout">
   <main>
     <section class="hero">
       <h1>Type a dream,<br><em>get a wallpaper.</em></h1>
-      <p>AI-powered wallpapers in any resolution. Free, instant, no sign-up.</p>
+      <p>AI-powered wallpapers in any resolution. Free, no sign-up. Generation takes 15–40 seconds.</p>
     </section>
 
     <div class="card">
@@ -383,15 +319,13 @@
 
       <div class="res-label">Resolution</div>
       <div class="res-grid" id="res-grid">
-        <button class="res-btn" data-w="1280" data-h="720">HD  1280×720</button>
-        <button class="res-btn active" data-w="1920" data-h="1080">FHD  1920×1080</button>
-        <button class="res-btn" data-w="2560" data-h="1440">QHD  2560×1440</button>
-        <button class="res-btn" data-w="3840" data-h="2160">4K  3840×2160</button>
-        <button class="res-btn" data-w="1080" data-h="1920">Mobile  1080×1920</button>
-        <button class="res-btn" data-w="2560" data-h="1600">Ultrawide  2560×1600</button>
+        <button class="res-btn" data-w="1280" data-h="720">HD 1280×720</button>
+        <button class="res-btn active" data-w="1920" data-h="1080">FHD 1920×1080</button>
+        <button class="res-btn" data-w="2560" data-h="1440">QHD 2560×1440</button>
+        <button class="res-btn" data-w="1080" data-h="1920">Mobile 1080×1920</button>
       </div>
 
-      <div class="tags-label">Style Modifier</div>
+      <div class="tags-label">Style (Optional)</div>
       <div class="tags" id="tags">
         <span class="tag">Photorealistic</span>
         <span class="tag">Cinematic</span>
@@ -404,26 +338,28 @@
         <span class="tag">Lo-fi</span>
         <span class="tag">Abstract</span>
       </div>
+
+      <p class="hint">💡 Lower resolution = faster. HD ~10s · FHD ~20s · QHD ~35s</p>
     </div>
 
     <div class="result-wrap" id="result-wrap">
       <div class="result-img-container">
         <div class="loading-overlay" id="loading">
           <div class="spinner"></div>
-          <div class="loading-text">Generating your wallpaper…</div>
+          <div class="loading-text" id="loading-text">Generating your wallpaper</div>
+          <div class="loading-timer" id="loading-timer">0s</div>
+          <div class="loading-sub">AI is painting — this normally takes 15–40s</div>
         </div>
         <img id="result-img" alt="AI generated wallpaper">
       </div>
       <div class="result-actions">
-        <button class="action-btn" onclick="generate()">↺ Regenerate</button>
+        <button class="action-btn" id="regen-btn" onclick="generate()">↺ Regenerate</button>
         <button class="action-btn primary" id="download-btn" onclick="downloadImg()">↓ Download</button>
       </div>
     </div>
-
   </main>
 
-  <!-- Sidebar ad (160×600) — only shown on desktop -->
-  <aside class="side-ad" id="side-ad">
+  <aside class="side-ad">
     <ins class="adsbygoogle"
       style="display:inline-block; width:160px; height:600px;"
       data-ad-client="ca-pub-3207104160733357"
@@ -432,14 +368,16 @@
 </div>
 
 <footer>
-  <p>Images generated via <a href="https://pollinations.ai" target="_blank">Pollinations.ai</a> · Free to use · No sign-up required</p>
+  <p>Images generated via <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.ai</a> · Free to use · No sign-up required</p>
   <p style="margin-top:0.5rem;">© 2025 WallGen AI</p>
 </footer>
 
 <script>
   let currentW = 1920, currentH = 1080;
-  let currentUrl = '';
+  let currentImgUrl = '';
+  let activeGeneration = null;
 
+  // Resolution buttons
   document.querySelectorAll('.res-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
@@ -449,10 +387,12 @@
     });
   });
 
+  // Style tags
   document.querySelectorAll('.tag').forEach(tag => {
     tag.addEventListener('click', () => tag.classList.toggle('active'));
   });
 
+  // Enter key triggers generate
   document.getElementById('prompt').addEventListener('keydown', e => {
     if (e.key === 'Enter') generate();
   });
@@ -463,125 +403,133 @@
 
   function buildPrompt(base) {
     const styles = getActiveStyles();
-    return styles ? `${base}, ${styles} style` : base;
+    return styles ? `${base}, ${styles}` : base;
   }
-
-  // ── Primary: Puter.js with FLUX Schnell (1-2s, no rate limits) ──
-  // ── Fallback: Pollinations.ai turbo model ──
-
-  async function generateViaPuter(prompt) {
-    // Puter returns an <img> element. Wait for it to fully load.
-    const imgEl = await puter.ai.txt2img(prompt, {
-      model: 'black-forest-labs/flux-1.schnell'
-    });
-    // The returned img may already be loaded; return its src (blob or data URL)
-    if (imgEl.complete && imgEl.naturalWidth > 0) return imgEl.src;
-    return new Promise((resolve, reject) => {
-      imgEl.onload = () => resolve(imgEl.src);
-      imgEl.onerror = () => reject(new Error('Puter img failed to load'));
-    });
-  }
-
-  async function generateViaPollinations(prompt, signal) {
-    const enc = encodeURIComponent(prompt);
-    const seed = Math.floor(Math.random() * 999999);
-    const url = `https://image.pollinations.ai/prompt/${enc}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=turbo`;
-    const res = await fetch(url, { signal });
-    if (!res.ok) throw new Error(`Pollinations ${res.status}`);
-    const blob = await res.blob();
-    return URL.createObjectURL(blob);
-  }
-
-  let activeReq = null;
 
   async function generate() {
     const promptVal = document.getElementById('prompt').value.trim();
-    if (!promptVal) { document.getElementById('prompt').focus(); return; }
+    if (!promptVal) {
+      document.getElementById('prompt').focus();
+      return;
+    }
+
+    // Cancel any ongoing generation
+    if (activeGeneration) {
+      activeGeneration.cancelled = true;
+      if (activeGeneration.controller) activeGeneration.controller.abort();
+    }
+    const gen = { cancelled: false, controller: new AbortController() };
+    activeGeneration = gen;
 
     const fullPrompt = buildPrompt(promptVal);
     const img = document.getElementById('result-img');
     const loading = document.getElementById('loading');
-    const loadingText = loading.querySelector('.loading-text');
+    const loadingText = document.getElementById('loading-text');
+    const loadingTimer = document.getElementById('loading-timer');
     const btn = document.getElementById('generate-btn');
+    const regenBtn = document.getElementById('regen-btn');
 
-    if (activeReq) activeReq.cancelled = true;
-    const req = { cancelled: false };
-    activeReq = req;
-
+    // Reset UI
     document.getElementById('result-wrap').classList.add('visible');
     loading.classList.remove('hidden');
     img.classList.remove('loaded');
     img.src = '';
     btn.disabled = true;
+    regenBtn.disabled = true;
     btn.textContent = 'Generating…';
 
-    const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…'];
-    let mi = 0;
-    loadingText.textContent = messages[0];
-    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 3000);
-    const reset = () => { clearInterval(msgTimer); btn.disabled=false; btn.textContent='Generate ✦'; };
+    // Start timer — shows user the actual elapsed time
+    const startTime = Date.now();
+    const timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      loadingTimer.textContent = `${elapsed}s`;
+      if (elapsed < 15) loadingText.textContent = 'Generating your wallpaper';
+      else if (elapsed < 30) loadingText.textContent = 'Still working, almost there';
+      else if (elapsed < 45) loadingText.textContent = 'Taking a bit longer than usual';
+      else loadingText.textContent = 'Server is slow, please be patient';
+    }, 500);
 
-    const displayUrl = (url) => {
-      if (req.cancelled) return;
+    const cleanup = () => {
+      clearInterval(timerInterval);
+      btn.disabled = false;
+      regenBtn.disabled = false;
+      btn.textContent = 'Generate ✦';
+    };
+
+    // Build Pollinations URL — using turbo model for faster generation
+    const seed = Math.floor(Math.random() * 999999);
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=turbo`;
+
+    try {
+      // 90-second hard timeout
+      const timeoutId = setTimeout(() => gen.controller.abort(), 90000);
+
+      const response = await fetch(url, { signal: gen.controller.signal });
+      clearTimeout(timeoutId);
+
+      if (gen.cancelled) return;
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('rate_limit');
+        }
+        throw new Error(`status_${response.status}`);
+      }
+
+      const blob = await response.blob();
+      if (gen.cancelled) return;
+
+      // Revoke previous blob URL to free memory
+      if (currentImgUrl && currentImgUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(currentImgUrl);
+      }
+
+      const blobUrl = URL.createObjectURL(blob);
+      currentImgUrl = blobUrl;
+
       img.onload = () => {
-        reset();
+        if (gen.cancelled) return;
+        cleanup();
         loading.classList.add('hidden');
         img.classList.add('loaded');
       };
-      img.src = url;
-      currentUrl = url;
-    };
+      img.onerror = () => {
+        if (gen.cancelled) return;
+        cleanup();
+        loadingText.textContent = 'Failed to load image';
+      };
+      img.src = blobUrl;
 
-    try {
-      // Try Puter first (fastest, no rate limits)
-      if (typeof puter !== 'undefined' && puter.ai) {
-        try {
-          const url = await generateViaPuter(fullPrompt);
-          if (!req.cancelled) { displayUrl(url); return; }
-        } catch (puterErr) {
-          console.warn('Puter failed, falling back to Pollinations:', puterErr);
-          loadingText.textContent = 'Switching to backup server…';
-        }
-      }
-
-      // Fallback: Pollinations turbo
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25000);
-      try {
-        const url = await generateViaPollinations(fullPrompt, controller.signal);
-        clearTimeout(timeout);
-        if (!req.cancelled) displayUrl(url);
-      } catch (pollErr) {
-        clearTimeout(timeout);
-        throw pollErr;
-      }
     } catch (err) {
-      if (req.cancelled) return;
-      reset();
-      loadingText.textContent = 'Generation failed. Please try again.';
-      console.error(err);
+      if (gen.cancelled) return;
+      cleanup();
+      if (err.name === 'AbortError') {
+        loadingText.textContent = 'Timed out. Try HD resolution.';
+        loadingTimer.textContent = '';
+      } else if (err.message === 'rate_limit') {
+        loadingText.textContent = 'Server busy — wait 10s and retry';
+        loadingTimer.textContent = '';
+      } else {
+        loadingText.textContent = 'Generation failed. Please try again.';
+        loadingTimer.textContent = '';
+      }
     }
   }
 
-  async function downloadImg() {
-    if (!currentUrl) return;
-    try {
-      // If it's a blob or data URL, direct download works
-      const a = document.createElement('a');
-      a.href = currentUrl;
-      a.download = `wallgen-ai-${currentW}x${currentH}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {
-      window.open(currentUrl, '_blank');
-    }
+  function downloadImg() {
+    if (!currentImgUrl) return;
+    const a = document.createElement('a');
+    a.href = currentImgUrl;
+    a.download = `wallgen-ai-${currentW}x${currentH}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
-  // Init only sidebar ad
+  // Init sidebar ad (desktop only)
   window.addEventListener('load', () => {
     if (window.innerWidth >= 960) {
-      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
     }
   });
 </script>
