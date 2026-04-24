@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WallGen AI – Free AI Wallpaper Generator</title>
+<meta name="description" content="Generate stunning AI wallpapers from keywords, free. Choose your resolution and download instantly.">
+
+<!-- Google AdSense — replace ca-pub-XXXXXXXXXX with your publisher ID after approval -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0eff8;
+    --muted: #8b8aa0;
+    --accent: #9d7dff;
+    --accent2: #c4a9ff;
+    --accent-glow: rgba(157,125,255,0.25);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-left: 1.5rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+
+  /* ── Ad banner slot ── */
+  .ad-banner {
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  /* Replace the placeholder div with: <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> */
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem 2rem;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 480px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+  }
+
+  /* ── Main card ── */
+  .card {
+    max-width: 680px;
+    margin: 0 auto 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+
+  .input-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #prompt {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #prompt::placeholder { color: var(--muted); }
+  #prompt:focus { border-color: var(--accent); }
+
+  #generate-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  #generate-btn:hover {
+    background: var(--accent2);
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+  #generate-btn:active { transform: scale(0.97); }
+  #generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── Resolution grid ── */
+  .res-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+
+  .res-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .res-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .res-btn:hover { border-color: var(--accent); color: var(--text); }
+  .res-btn.active {
+    background: rgba(157,125,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  /* ── Style tags ── */
+  .tags-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tag:hover { border-color: var(--border2); color: var(--text); }
+  .tag.active {
+    background: rgba(157,125,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  /* ── Result area ── */
+  .result-wrap {
+    max-width: 680px;
+    margin: 0 auto 3rem;
+    display: none;
+  }
+  .result-wrap.visible { display: block; }
+
+  .result-img-container {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #result-img {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  #result-img.loaded { opacity: 1; }
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--surface);
+  }
+  .loading-overlay.hidden { display: none; }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .action-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { border-color: var(--accent); background: rgba(157,125,255,0.08); }
+  .action-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+  .action-btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  /* ── Side ad slot ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 960px) {
+    .layout {
+      grid-template-columns: 1fr 160px;
+      gap: 2rem;
+      align-items: start;
+    }
+    .side-ad {
+      position: sticky;
+      top: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 2rem;
+    }
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--muted); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">Wall<span>Gen</span> AI</a>
+  <nav>
+    <a href="#">Gallery</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
+<!-- Top leaderboard ad (728x90) — replace with real AdSense code after approval -->
+<div class="ad-banner">Advertisement · 728×90</div>
+
+<div class="layout">
+  <main>
+    <section class="hero">
+      <h1>Type a dream,<br><em>get a wallpaper.</em></h1>
+      <p>AI-powered wallpapers in any resolution. Free, instant, no sign-up.</p>
+    </section>
+
+    <div class="card">
+      <div class="input-group">
+        <input type="text" id="prompt" placeholder="e.g. misty mountain forest at golden hour" autocomplete="off">
+        <button id="generate-btn" onclick="generate()">Generate ✦</button>
+      </div>
+
+      <div class="res-label">Resolution</div>
+      <div class="res-grid" id="res-grid">
+        <button class="res-btn" data-w="1280" data-h="720">HD  1280×720</button>
+        <button class="res-btn active" data-w="1920" data-h="1080">FHD  1920×1080</button>
+        <button class="res-btn" data-w="2560" data-h="1440">QHD  2560×1440</button>
+        <button class="res-btn" data-w="3840" data-h="2160">4K  3840×2160</button>
+        <button class="res-btn" data-w="1080" data-h="1920">Mobile  1080×1920</button>
+        <button class="res-btn" data-w="2560" data-h="1600">Ultrawide  2560×1600</button>
+      </div>
+
+      <div class="tags-label">Style Modifier</div>
+      <div class="tags" id="tags">
+        <span class="tag">Photorealistic</span>
+        <span class="tag">Cinematic</span>
+        <span class="tag">Oil Painting</span>
+        <span class="tag">Watercolor</span>
+        <span class="tag">Cyberpunk</span>
+        <span class="tag">Anime</span>
+        <span class="tag">Minimal</span>
+        <span class="tag">Dark Fantasy</span>
+        <span class="tag">Lo-fi</span>
+        <span class="tag">Abstract</span>
+      </div>
+    </div>
+
+    <div class="result-wrap" id="result-wrap">
+      <div class="result-img-container">
+        <div class="loading-overlay" id="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Generating your wallpaper…</div>
+        </div>
+        <img id="result-img" alt="AI generated wallpaper">
+      </div>
+      <div class="result-actions">
+        <button class="action-btn" onclick="generate()">↺ Regenerate</button>
+        <button class="action-btn primary" id="download-btn" onclick="downloadImg()">↓ Download</button>
+      </div>
+    </div>
+
+    <!-- In-content ad (after result) — replace with real AdSense tag -->
+    <div class="ad-banner" id="content-ad" style="border-radius:12px; margin: 0 auto 2rem; max-width:680px; display:none;">
+      Advertisement · 728×90
+    </div>
+  </main>
+
+  <!-- Sidebar ad (160×600) -->
+  <aside class="side-ad">Ad · 160×600</aside>
+</div>
+
+<footer>
+  <p>Images generated via <a href="https://pollinations.ai" target="_blank">Pollinations.ai</a> · Free to use · No sign-up required</p>
+  <p style="margin-top:0.5rem;">© 2025 WallGen AI</p>
+</footer>
+
+<script>
+  let currentW = 1920, currentH = 1080;
+  let currentStyle = '';
+  let currentUrl = '';
+
+  document.querySelectorAll('.res-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentW = parseInt(btn.dataset.w);
+      currentH = parseInt(btn.dataset.h);
+    });
+  });
+
+  document.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      tag.classList.toggle('active');
+    });
+  });
+
+  document.getElementById('prompt').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generate();
+  });
+
+  function getActiveStyles() {
+    return [...document.querySelectorAll('.tag.active')].map(t => t.textContent).join(', ');
+  }
+
+  function generate() {
+    const promptVal = document.getElementById('prompt').value.trim();
+    if (!promptVal) {
+      document.getElementById('prompt').focus();
+      return;
+    }
+
+    const styles = getActiveStyles();
+    const fullPrompt = styles ? `${promptVal}, ${styles} style` : promptVal;
+    const encoded = encodeURIComponent(fullPrompt);
+    const seed = Math.floor(Math.random() * 999999);
+
+    currentUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true`;
+
+    const wrap = document.getElementById('result-wrap');
+    const img = document.getElementById('result-img');
+    const loading = document.getElementById('loading');
+    const btn = document.getElementById('generate-btn');
+    const contentAd = document.getElementById('content-ad');
+
+    wrap.classList.add('visible');
+    loading.classList.remove('hidden');
+    img.classList.remove('loaded');
+    img.src = '';
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+
+    img.onload = () => {
+      loading.classList.add('hidden');
+      img.classList.add('loaded');
+      btn.disabled = false;
+      btn.textContent = 'Generate ✦';
+      contentAd.style.display = 'flex';
+    };
+
+    img.onerror = () => {
+      loading.querySelector('.loading-text').textContent = 'Error loading image. Try again.';
+      btn.disabled = false;
+      btn.textContent = 'Generate ✦';
+    };
+
+    img.src = currentUrl;
+  }
+
+  async function downloadImg() {
+    if (!currentUrl) return;
+    try {
+      const res = await fetch(currentUrl);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `wallgen-ai-${currentW}x${currentH}.jpg`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      window.open(currentUrl, '_blank');
+    }
+  }
+</script>
+</body>
+</html>
