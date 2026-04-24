@@ -206,6 +206,26 @@
     line-height: 1.5;
   }
 
+  .random-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+  }
+  #random-btn {
+    background: transparent;
+    border: 1px dashed var(--border2);
+    border-radius: 20px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  #random-btn:hover { border-color: var(--accent); color: var(--accent2); }
+  #random-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   .result-wrap { max-width: 680px; margin: 0 auto 3rem; display: none; }
   .result-wrap.visible { display: block; }
 
@@ -348,9 +368,13 @@
         <input type="text" id="prompt" placeholder="e.g. misty mountain forest at golden hour" autocomplete="off">
         <button id="generate-btn" onclick="handleGenerateClick()">Generate ✦</button>
       </div>
+      <div class="random-row">
+        <button id="random-btn" onclick="randomGenerate()" title="Pick a random prompt and generate">🎲 Mali Mali Hom</button>
+      </div>
 
       <div class="res-label">Resolution</div>
       <div class="res-grid" id="res-grid">
+        <button class="res-btn" data-w="640" data-h="360">Thumbnail 640×360</button>
         <button class="res-btn" data-w="1280" data-h="720">HD 1280×720</button>
         <button class="res-btn active" data-w="1920" data-h="1080">FHD 1920×1080</button>
         <button class="res-btn" data-w="2560" data-h="1440">QHD 2560×1440</button>
@@ -372,7 +396,7 @@
       </div>
       <p class="style-warning" id="style-warning">⚠️ Multiple styles make generation much slower. Pick one for best speed.</p>
 
-      <p class="hint">💡 Lower resolution = faster. HD ~10s · FHD ~20s · QHD ~35s</p>
+      <p class="hint">💡 Lower resolution = faster. Thumbnail ~5s · HD ~10s · FHD ~20s · QHD ~35s</p>
     </div>
 
     <div class="result-wrap" id="result-wrap">
@@ -420,6 +444,34 @@
   let currentImgUrl = '';
   let activeGeneration = null;
 
+  const RANDOM_PROMPTS = [
+    'a mystical forest with glowing mushrooms at night',
+    'futuristic city skyline at sunset with neon reflections',
+    'serene Japanese garden in cherry blossom season',
+    'deep ocean bioluminescent creatures in dark water',
+    'ancient ruins overgrown with tropical vines at dawn',
+    'northern lights dancing over a frozen mountain lake',
+    'cozy cabin in a snowy forest at twilight',
+    'vast desert dunes under a star-filled sky',
+    'tropical beach with crystal-clear turquoise water',
+    'misty mountain valley at golden hour',
+    'abandoned space station drifting through a colorful nebula',
+    'enchanted library with floating books and warm lantern light',
+    'thundering waterfall cascading into a hidden jungle pool',
+    'medieval castle perched on a cliff above a stormy sea',
+    'field of wildflowers stretching to the horizon at sunset',
+    'underwater coral reef teeming with colorful tropical fish',
+    'volcanic eruption reflected in a perfectly calm lake',
+    'rain-soaked cyberpunk alley glowing with neon signs',
+    'autumn forest path blanketed in golden fallen leaves',
+    'dramatic lightning storm over a vast open ocean',
+    'lone lighthouse on rocky coast under moonlight',
+    'cherry blossom petals drifting over a quiet temple pond',
+    'foggy mountain road winding through pine trees at dawn',
+    'giant ancient tree with glowing roots in a fantasy forest',
+    'minimalist snowy landscape with a single red torii gate',
+  ];
+
   // Resolution buttons
   document.querySelectorAll('.res-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -453,6 +505,12 @@
     return styles ? `${base}, ${styles}` : base;
   }
 
+  function randomGenerate() {
+    const pick = RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)];
+    document.getElementById('prompt').value = pick;
+    generate();
+  }
+
   // Button click handler — toggles between Generate and Stop
   function handleGenerateClick() {
     if (activeGeneration && !activeGeneration.cancelled) {
@@ -468,6 +526,7 @@
     const resGrid = document.getElementById('res-grid');
     const tagsEl = document.getElementById('tags');
     const downloadBtn = document.getElementById('download-btn');
+    const randomBtn = document.getElementById('random-btn');
 
     if (locked) {
       promptInput.classList.add('locked');
@@ -475,12 +534,14 @@
       resGrid.classList.add('locked');
       tagsEl.classList.add('locked');
       downloadBtn.classList.add('locked');
+      randomBtn.disabled = true;
     } else {
       promptInput.classList.remove('locked');
       promptInput.removeAttribute('readonly');
       resGrid.classList.remove('locked');
       tagsEl.classList.remove('locked');
       downloadBtn.classList.remove('locked');
+      randomBtn.disabled = false;
     }
   }
 
