@@ -364,15 +364,6 @@
   </nav>
 </header>
 
-<!-- Top leaderboard ad -->
-<div class="ad-banner" style="min-height:90px; width:100%; display:block;">
-  <ins class="adsbygoogle"
-    style="display:block; min-height:90px;"
-    data-ad-client="ca-pub-3207104160733357"
-    data-ad-format="auto"
-    data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-</div>
 
 <div class="layout">
   <main>
@@ -426,14 +417,6 @@
       </div>
     </div>
 
-<!-- In-content ad — hidden via visibility, not display:none, so AdSense can measure it -->
-<div id="content-ad" style="border-radius:12px; margin: 0 auto 2rem; max-width:680px; min-height:90px; visibility:hidden; width:100%;">
-  <ins class="adsbygoogle"
-    style="display:block; min-height:90px;"
-    data-ad-client="ca-pub-3207104160733357"
-    data-ad-format="auto"
-    data-full-width-responsive="true"></ins>
-</div>
   </main>
 
   <!-- Sidebar ad (160×600) — only shown on desktop -->
@@ -588,7 +571,6 @@
         reset();
         loading.classList.add('hidden');
         img.classList.add('loaded');
-        document.getElementById('content-ad').style.visibility = 'visible';
         prefetchNext(fullPrompt);
       };
       img.src = blobUrl;
@@ -604,25 +586,40 @@
       return;
     }
 
-    // Race all providers with 30s hard timeout
-    const controller = new AbortController();
-    const hardTimeout = setTimeout(() => {
-      controller.abort();
-    }, 30000);
+    // Keep retrying every 5s until 30s total — so user always gets a result
+    const deadline = Date.now() + 30000;
 
-    raceProviders(fullPrompt, controller.signal)
-      .then(blob => {
-        clearTimeout(hardTimeout);
-        showBlob(blob);
-      })
-      .catch(err => {
-        clearTimeout(hardTimeout);
-        if (req.cancelled) return;
+    function tryGenerate() {
+      if (req.cancelled) return;
+      const timeLeft = deadline - Date.now();
+      if (timeLeft <= 0) {
         reset();
-        loadingText.textContent = err.name === 'AbortError'
-          ? 'Timed out after 30s. Try a simpler prompt or lower resolution.'
-          : 'All servers busy. Please try again in a moment.';
-      });
+        loadingText.textContent = 'Timed out. Please try again.';
+        return;
+      }
+      const controller = new AbortController();
+      const perAttemptTimeout = setTimeout(() => controller.abort(), Math.min(timeLeft, 25000));
+
+      raceProviders(fullPrompt, controller.signal)
+        .then(blob => {
+          clearTimeout(perAttemptTimeout);
+          showBlob(blob);
+        })
+        .catch(err => {
+          clearTimeout(perAttemptTimeout);
+          if (req.cancelled) return;
+          if (err.name === 'AbortError' || Date.now() >= deadline) {
+            reset();
+            loadingText.textContent = 'Timed out. Please try again.';
+          } else {
+            // Failed but still have time — retry in 3s
+            loadingText.textContent = 'Server busy, retrying…';
+            setTimeout(tryGenerate, 3000);
+          }
+        });
+    }
+
+    tryGenerate();
   }
 
   async function downloadImg() {
@@ -637,19 +634,11 @@
     }
   }
 
-  // Init ads after page fully renders so AdSense can measure widths correctly
+  // Init only sidebar ad
   window.addEventListener('load', () => {
-    // Top banner — always visible, push immediately
-    (adsbygoogle = window.adsbygoogle || []).push({});
-
-    // Sidebar — only on desktop (width >= 960px)
     if (window.innerWidth >= 960) {
       (adsbygoogle = window.adsbygoogle || []).push({});
     }
-
-    // In-content ad — push now (it's in DOM, just visibility:hidden)
-    // AdSense can measure it; it will show when visibility turns visible
-    (adsbygoogle = window.adsbygoogle || []).push({});
   });
 </script>
 </body>
