@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — WallGen AI</title>
+<meta name="description" content="WallGen AI is a free, no-sign-up AI wallpaper generator. Built as a passion project. Keep it alive by exploring our gallery.">
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3207104160733357" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0eff8;
+    --muted: #8b8aa0;
+    --accent: #9d7dff;
+    --accent2: #c4a9ff;
+    --accent-glow: rgba(157,125,255,0.25);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-left: 1.5rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--accent2); }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 4rem;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent2); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .section {
+    margin-bottom: 3.5rem;
+  }
+
+  .section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    font-style: italic;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section p {
+    font-size: 1rem;
+    color: var(--text);
+    opacity: 0.88;
+    margin-bottom: 1rem;
+  }
+  .section p.muted {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  /* Highlighted quote block */
+  .quote {
+    background: linear-gradient(135deg, rgba(157,125,255,0.08), rgba(196,169,255,0.04));
+    border-left: 3px solid var(--accent);
+    padding: 1.5rem 1.75rem;
+    border-radius: 0 12px 12px 0;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    color: var(--accent2);
+    margin: 2rem 0;
+  }
+
+  /* Stats strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2.5rem 0;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--accent2);
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* CTA card */
+  .cta-card {
+    background: linear-gradient(135deg, rgba(157,125,255,0.12), rgba(196,169,255,0.04));
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+    padding: 2.2rem 2rem;
+    text-align: center;
+    margin: 3rem 0 2rem;
+    box-shadow: 0 0 40px rgba(157,125,255,0.1);
+  }
+
+  .cta-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.02em;
+  }
+  .cta-card h3 em { font-style: italic; color: var(--accent2); }
+
+  .cta-card p {
+    color: var(--text);
+    opacity: 0.85;
+    font-size: 0.95rem;
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.65;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.8rem 1.6rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--accent2);
+    box-shadow: 0 0 24px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent);
+  }
+  .btn-secondary:hover {
+    background: rgba(157,125,255,0.1);
+  }
+
+  /* Supporters section */
+  .supporters-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+  .supporter-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: 0.92rem;
+  }
+  .supporter-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(157,125,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent2);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .signature {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .signature strong { color: var(--accent2); font-style: normal; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--muted); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">Wall<span>Gen</span> AI</a>
+  <nav>
+    <a href="gallery.html">Gallery</a>
+    <a href="about.html" class="active">About</a>
+    <a href="index.html">Generate ✦</a>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>Made with <em>love</em>,<br>shared for <em>free</em>.</h1>
+    <p class="hero-sub">WallGen AI turns your imagination into desktop and phone wallpapers. No sign-ups, no watermarks, no paywalls — just you, a prompt, and a beautiful result.</p>
+  </div>
+
+  <section class="section">
+    <h2>The story</h2>
+    <p>It started with a simple frustration — every time I searched for a wallpaper that matched exactly what I had in mind, I ended up with the same overused stock photos, or sites that demanded a login, a subscription, and my firstborn child.</p>
+    <p>So I built WallGen AI. One page, one input, one click. Type what you dream up, pick a resolution, and seconds later it's yours. Forever.</p>
+  </section>
+
+  <div class="quote">
+    "The best tools disappear into the background. You think of an idea, and it just happens."
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">60+</div>
+      <div class="stat-label">Wallpapers</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Generations</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">Forever Free</div>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2>Always free, and here's why</h2>
+    <p>Running WallGen AI costs real money — servers, bandwidth, and the AI models behind the scenes. I could've put up a paywall. I could've demanded sign-ups and sold your data. I didn't, and I never will.</p>
+    <p>Instead, I rely on something simple and honest: <strong>ads</strong>. Small, unobtrusive banners that pay a fraction of a cent each time someone like you visits. That's it. That's the whole business model.</p>
+  </section>
+
+  <div class="cta-card">
+    <h3>Love what you see? <em>Here's how to help.</em></h3>
+    <p>The best way to keep WallGen AI free forever is to actually <strong>use it</strong> — browse the gallery, generate your own wallpapers, come back when you need a new one, and share it with a friend. Every visit helps keep the lights on.</p>
+    <div class="cta-btns">
+      <a href="gallery.html" class="btn btn-primary">Browse the Gallery →</a>
+      <a href="index.html" class="btn btn-secondary">Generate Yours ✦</a>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2>The real ways you can help</h2>
+    <div class="supporters-list">
+      <div class="supporter-item">
+        <div class="supporter-icon">✦</div>
+        <div><strong style="color:var(--accent2);">Use it often.</strong> Set it as your wallpaper homepage. The more you visit, the longer it survives.</div>
+      </div>
+      <div class="supporter-item">
+        <div class="supporter-icon">♥</div>
+        <div><strong style="color:var(--accent2);">Share it.</strong> Send WallGen AI to one friend who'd love it. That's the highest compliment.</div>
+      </div>
+      <div class="supporter-item">
+        <div class="supporter-icon">✎</div>
+        <div><strong style="color:var(--accent2);">Bookmark the Gallery.</strong> New wallpapers added regularly. Come back for fresh inspiration.</div>
+      </div>
+      <div class="supporter-item">
+        <div class="supporter-icon">☕</div>
+        <div><strong style="color:var(--accent2);">Browse naturally.</strong> When an ad catches your eye, it's okay to check it out. Every bit helps.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>What's next</h2>
+    <p>More styles. More categories. Better models. A curated "wallpaper of the day." Maybe even an iPhone and Android app if there's enough love.</p>
+    <p class="muted">WallGen AI is built and maintained by one person, in spare hours, because the internet is better when things are free and beautiful.</p>
+  </section>
+
+  <div class="signature">
+    Thanks for being here. <strong>— WallGen AI</strong>
+  </div>
+
+</main>
+
+<footer>
+  <p>Images generated with <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.ai</a> · Free to use · No sign-up required</p>
+  <p style="margin-top:0.5rem;">© 2025 WallGen AI · <a href="gallery.html">Gallery</a> · <a href="index.html">Generate</a></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — WallGen AI</title>
+<meta name="description" content="Browse 60+ free AI-generated wallpapers. Urban, Lo-fi, Nature, Animals, and Abstract styles. All 1920×1080, ready to download.">
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3207104160733357" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0eff8;
+    --muted: #8b8aa0;
+    --accent: #9d7dff;
+    --accent2: #c4a9ff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-left: 1.5rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--accent2); }
+
+  .hero {
+    text-align: center;
+    padding: 3.5rem 1rem 1.5rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.6rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent2); }
+  .hero p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0 1rem 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .filter-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .filter-pill:hover { border-color: var(--border2); color: var(--text); }
+  .filter-pill.active {
+    background: rgba(157,125,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+
+  .category {
+    margin-bottom: 3.5rem;
+  }
+  .category.hidden { display: none; }
+
+  .category-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .category-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    letter-spacing: -0.02em;
+  }
+  .category-meta {
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-left: 0.8rem;
+  }
+
+  .thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .thumb {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s, transform 0.2s;
+  }
+  .thumb:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .thumb-img-wrap {
+    position: relative;
+    aspect-ratio: 16/10;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .thumb:hover img { transform: scale(1.04); }
+
+  .thumb-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 400;
+    padding: 1.5rem 0.8rem 0.6rem;
+  }
+
+  .thumb-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+  }
+  .thumb-res {
+    color: var(--muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .thumb-download {
+    color: var(--accent2);
+    font-size: 0.78rem;
+    text-decoration: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .thumb-download:hover { background: rgba(157,125,255,0.12); }
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--muted); text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .thumb-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .thumb-title { font-size: 0.72rem; }
+    .category-title { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">Wall<span>Gen</span> AI</a>
+  <nav>
+    <a href="gallery.html" class="active">Gallery</a>
+    <a href="about.html">About</a>
+    <a href="index.html">Generate ✦</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Free <em>ready-to-download</em> wallpapers</h1>
+  <p>60+ hand-picked AI wallpapers, organized by style. All 1920×1080, free to use.</p>
+</section>
+
+<div class="filter-bar" id="filter-bar">
+  <span class="filter-pill active" data-cat="all">All</span>
+  <!-- pills populated by JS -->
+</div>
+
+<main id="gallery-main">
+  <p style="text-align:center; color:var(--muted); padding:2rem;">Loading gallery…</p>
+</main>
+
+<footer>
+  <p>Images generated with <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.ai</a> · Free to use · No sign-up required</p>
+  <p style="margin-top:0.5rem;">© 2025 WallGen AI · <a href="about.html">About</a> · <a href="index.html">Generate your own</a></p>
+</footer>
+
+<script>
+  async function loadGallery() {
+    const res = await fetch('gallery.json');
+    const data = await res.json();
+    const filterBar = document.getElementById('filter-bar');
+    const main = document.getElementById('gallery-main');
+
+    // Build filter pills
+    for (const cat of data.categories) {
+      const pill = document.createElement('span');
+      pill.className = 'filter-pill';
+      pill.dataset.cat = cat.id;
+      pill.textContent = cat.title;
+      filterBar.appendChild(pill);
+    }
+
+    // Build category sections
+    main.innerHTML = '';
+    for (const cat of data.categories) {
+      const section = document.createElement('section');
+      section.className = 'category';
+      section.dataset.cat = cat.id;
+
+      const header = `
+        <div class="category-header">
+          <div>
+            <span class="category-title">${cat.title}</span>
+            <span class="category-meta">${cat.images.length} wallpapers · ${cat.description}</span>
+          </div>
+        </div>
+      `;
+
+      const grid = document.createElement('div');
+      grid.className = 'thumb-grid';
+
+      for (const img of cat.images) {
+        const imgPath = `images/${cat.id}/${img.file}`;
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.innerHTML = `
+          <div class="thumb-img-wrap">
+            <img src="${imgPath}" alt="${img.title}" loading="lazy"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML+='<div class=placeholder>Generating soon…</div>';">
+            <div class="thumb-title">${img.title}</div>
+          </div>
+          <div class="thumb-meta">
+            <span class="thumb-res">1920×1080</span>
+            <a href="${imgPath}" download="wallgen-${img.file}" class="thumb-download">↓ Download</a>
+          </div>
+        `;
+        grid.appendChild(thumb);
+      }
+
+      section.innerHTML = header;
+      section.appendChild(grid);
+      main.appendChild(section);
+    }
+
+    // Filter logic
+    filterBar.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('filter-pill')) return;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
+      const cat = e.target.dataset.cat;
+      document.querySelectorAll('.category').forEach(sec => {
+        sec.classList.toggle('hidden', cat !== 'all' && sec.dataset.cat !== cat);
+      });
+    });
+  }
+
+  loadGallery().catch(err => {
+    document.getElementById('gallery-main').innerHTML =
+      '<p style="text-align:center; color:var(--muted); padding:2rem;">Could not load gallery. Please refresh.</p>';
+    console.error(err);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{
+  "categories": [
+    {
+      "id": "urban",
+      "title": "Urban",
+      "description": "Streets, cities, neon nights",
+      "images": [
+        { "file": "urban-01.jpg", "prompt": "rainy Tokyo street at night, neon signs reflecting on wet pavement, cinematic", "title": "Rainy Tokyo" },
+        { "file": "urban-02.jpg", "prompt": "New York skyline at golden hour, dramatic clouds, photorealistic", "title": "NYC Skyline" },
+        { "file": "urban-03.jpg", "prompt": "Paris cafe street at dusk, warm lights, watercolor style", "title": "Paris Cafe" },
+        { "file": "urban-04.jpg", "prompt": "cyberpunk neon alley, rain puddles, vibrant purple and cyan", "title": "Neon Alley" },
+        { "file": "urban-05.jpg", "prompt": "subway station at night, empty platform, moody cinematic lighting", "title": "Empty Subway" },
+        { "file": "urban-06.jpg", "prompt": "London red double decker bus in the rain, vintage film look", "title": "Red Bus" },
+        { "file": "urban-07.jpg", "prompt": "Singapore gardens by the bay at night, supertrees glowing", "title": "Gardens Bay" },
+        { "file": "urban-08.jpg", "prompt": "Tuscany hilltop village at sunset, warm earth tones, photorealistic", "title": "Tuscan Village" },
+        { "file": "urban-09.jpg", "prompt": "Seoul city skyline at night, futuristic lights, cinematic wide shot", "title": "Seoul Nights" },
+        { "file": "urban-10.jpg", "prompt": "Venice canals at dawn, misty soft light, watercolor painting", "title": "Venice Dawn" },
+        { "file": "urban-11.jpg", "prompt": "retro vaporwave arcade, pink and purple neon, 80s aesthetic", "title": "Retro Arcade" },
+        { "file": "urban-12.jpg", "prompt": "Berlin brutalist architecture at dawn, minimal composition, fog", "title": "Berlin Dawn" }
+      ]
+    },
+    {
+      "id": "lofi",
+      "title": "Lo-fi",
+      "description": "Cozy cafes, rainy windows, study vibes",
+      "images": [
+        { "file": "lofi-01.jpg", "prompt": "cozy cafe reading nook with warm lamp, rain outside window, lofi anime style", "title": "Reading Nook" },
+        { "file": "lofi-02.jpg", "prompt": "girl studying at desk with cat, rainy window, lofi illustration", "title": "Study Session" },
+        { "file": "lofi-03.jpg", "prompt": "sunset balcony with plants and coffee cup, warm orange light, lofi anime", "title": "Sunset Balcony" },
+        { "file": "lofi-04.jpg", "prompt": "girl with headphones looking out train window, lofi illustration, soft colors", "title": "Train Window" },
+        { "file": "lofi-05.jpg", "prompt": "cozy bedroom with fairy lights and books, night scene, lofi warm", "title": "Cozy Bedroom" },
+        { "file": "lofi-06.jpg", "prompt": "rainy cafe with steaming coffee on table, lofi watercolor, muted palette", "title": "Rainy Cafe" },
+        { "file": "lofi-07.jpg", "prompt": "person reading under tree in autumn park, lofi illustration, golden leaves", "title": "Autumn Read" },
+        { "file": "lofi-08.jpg", "prompt": "cat sleeping on windowsill at sunset, lofi anime warm colors", "title": "Cat Sunset" },
+        { "file": "lofi-09.jpg", "prompt": "plant shop interior with warm afternoon light, lofi cozy aesthetic", "title": "Plant Shop" },
+        { "file": "lofi-10.jpg", "prompt": "boy walking dog down quiet suburban street, lofi illustration, pastel", "title": "Evening Walk" },
+        { "file": "lofi-11.jpg", "prompt": "kitchen window with herb garden, morning light, lofi warm minimal", "title": "Herb Kitchen" },
+        { "file": "lofi-12.jpg", "prompt": "record player and vinyl on wooden desk, lofi vintage warm tones", "title": "Vinyl Desk" }
+      ]
+    },
+    {
+      "id": "nature",
+      "title": "Nature",
+      "description": "Landscapes, mountains, forests",
+      "images": [
+        { "file": "nature-01.jpg", "prompt": "misty mountain forest at dawn, sun rays through trees, photorealistic", "title": "Misty Forest" },
+        { "file": "nature-02.jpg", "prompt": "aurora borealis over snowy mountains, vibrant green and purple sky", "title": "Northern Lights" },
+        { "file": "nature-03.jpg", "prompt": "tropical beach with turquoise water and palm trees, golden hour", "title": "Tropical Beach" },
+        { "file": "nature-04.jpg", "prompt": "cherry blossom trees in full bloom, soft pink, Japanese garden", "title": "Sakura Bloom" },
+        { "file": "nature-05.jpg", "prompt": "lavender field at sunset, purple waves, cinematic wide shot", "title": "Lavender Field" },
+        { "file": "nature-06.jpg", "prompt": "waterfall cascading through lush green jungle, misty atmosphere", "title": "Jungle Falls" },
+        { "file": "nature-07.jpg", "prompt": "desert dunes at sunset, warm orange sand, minimal composition", "title": "Desert Dunes" },
+        { "file": "nature-08.jpg", "prompt": "icelandic glacier lagoon with blue ice, moody overcast sky", "title": "Glacier Lagoon" },
+        { "file": "nature-09.jpg", "prompt": "alpine meadow with wildflowers and mountain backdrop, photorealistic", "title": "Alpine Meadow" },
+        { "file": "nature-10.jpg", "prompt": "autumn forest path with golden leaves, warm morning light", "title": "Autumn Path" },
+        { "file": "nature-11.jpg", "prompt": "starry night sky over pine forest silhouette, milky way visible", "title": "Starry Pines" },
+        { "file": "nature-12.jpg", "prompt": "coastal cliffs at sunset with crashing waves, dramatic lighting", "title": "Coastal Cliffs" }
+      ]
+    },
+    {
+      "id": "animals",
+      "title": "Animals",
+      "description": "Pets, wildlife, companions",
+      "images": [
+        { "file": "animals-01.jpg", "prompt": "orange tabby cat sitting in cafe window, soft warm light, photorealistic", "title": "Cafe Cat" },
+        { "file": "animals-02.jpg", "prompt": "fluffy corgi puppy running through grass field, golden hour", "title": "Corgi Run" },
+        { "file": "animals-03.jpg", "prompt": "red fox in snowy forest, bright eyes, photorealistic wildlife", "title": "Winter Fox" },
+        { "file": "animals-04.jpg", "prompt": "majestic white tiger in jungle, dramatic lighting, photorealistic", "title": "White Tiger" },
+        { "file": "animals-05.jpg", "prompt": "hummingbird hovering near red flower, slow motion, macro detail", "title": "Hummingbird" },
+        { "file": "animals-06.jpg", "prompt": "black cat on windowsill at night with moon, mystical atmosphere", "title": "Moon Cat" },
+        { "file": "animals-07.jpg", "prompt": "golden retriever playing in autumn leaves, joyful, photorealistic", "title": "Happy Retriever" },
+        { "file": "animals-08.jpg", "prompt": "owl perched on branch in misty forest, golden eyes, cinematic", "title": "Forest Owl" },
+        { "file": "animals-09.jpg", "prompt": "dolphin jumping over ocean waves at sunset, photorealistic", "title": "Ocean Dolphin" },
+        { "file": "animals-10.jpg", "prompt": "deer standing in misty meadow at dawn, ethereal soft light", "title": "Misty Deer" },
+        { "file": "animals-11.jpg", "prompt": "colorful parrot on tropical branch, vibrant feathers, macro", "title": "Tropical Parrot" },
+        { "file": "animals-12.jpg", "prompt": "bear standing on rock at sunset, silhouette, dramatic sky", "title": "Mountain Bear" }
+      ]
+    },
+    {
+      "id": "abstract",
+      "title": "Abstract",
+      "description": "Patterns, gradients, minimal art",
+      "images": [
+        { "file": "abstract-01.jpg", "prompt": "flowing liquid gradient, purple pink cyan, smooth abstract minimal", "title": "Liquid Dream" },
+        { "file": "abstract-02.jpg", "prompt": "geometric mountain shapes in pastel colors, minimal flat design", "title": "Geo Peaks" },
+        { "file": "abstract-03.jpg", "prompt": "colorful smoke swirling on black background, dramatic abstract", "title": "Smoke Swirl" },
+        { "file": "abstract-04.jpg", "prompt": "iridescent holographic waves, rainbow gradient, abstract minimal", "title": "Holo Waves" },
+        { "file": "abstract-05.jpg", "prompt": "swirling galaxy with nebula colors, deep space, purple blue", "title": "Nebula" },
+        { "file": "abstract-06.jpg", "prompt": "minimalist single line art mountain, pastel gradient sky", "title": "Line Mountain" },
+        { "file": "abstract-07.jpg", "prompt": "3D glossy bubbles floating, iridescent pastel, abstract render", "title": "Glossy Bubbles" },
+        { "file": "abstract-08.jpg", "prompt": "flowing silk fabric in wind, vibrant pink and orange, abstract", "title": "Silk Flow" },
+        { "file": "abstract-09.jpg", "prompt": "abstract watercolor splash, teal and gold, artistic minimal", "title": "Gold Splash" },
+        { "file": "abstract-10.jpg", "prompt": "neon grid tunnel perspective, synthwave 80s retro futuristic", "title": "Neon Grid" },
+        { "file": "abstract-11.jpg", "prompt": "crystal formations refracting rainbow light, macro abstract", "title": "Crystal Light" },
+        { "file": "abstract-12.jpg", "prompt": "swirling paint mix, black gold and red, fluid art abstract", "title": "Paint Swirl" }
+      ]
+    }
+  ]
+}
