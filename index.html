@@ -481,42 +481,60 @@
     const encoded = encodeURIComponent(fullPrompt);
     const seed = Math.floor(Math.random() * 999999);
 
-    currentUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true`;
+    currentUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
 
     const wrap = document.getElementById('result-wrap');
     const img = document.getElementById('result-img');
     const loading = document.getElementById('loading');
+    const loadingText = loading.querySelector('.loading-text');
     const btn = document.getElementById('generate-btn');
     const contentAd = document.getElementById('content-ad');
 
     wrap.classList.add('visible');
     loading.classList.remove('hidden');
     img.classList.remove('loaded');
-    img.src = '';
     btn.disabled = true;
     btn.textContent = 'Generating…';
 
-    img.onload = () => {
-      loading.classList.add('hidden');
-      img.classList.add('loaded');
+    // Animated loading messages so user knows it's working
+    const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…', 'Rendering final image…'];
+    let mi = 0;
+    loadingText.textContent = messages[0];
+    const msgTimer = setInterval(() => { mi = (mi+1) % messages.length; loadingText.textContent = messages[mi]; }, 3000);
+
+    // Remove crossOrigin so browser loads it like a normal <img>
+    img.removeAttribute('crossorigin');
+    img.onload = null;
+    img.onerror = null;
+
+    const newImg = new Image();
+
+    const done = (success) => {
+      clearInterval(msgTimer);
       btn.disabled = false;
       btn.textContent = 'Generate ✦';
-      contentAd.style.display = 'flex';
+      if (success) {
+        img.src = currentUrl;
+        loading.classList.add('hidden');
+        img.classList.add('loaded');
+        contentAd.style.display = 'flex';
+      } else {
+        loadingText.textContent = 'Failed to generate. Please try again.';
+      }
     };
 
-    img.onerror = () => {
-      loading.querySelector('.loading-text').textContent = 'Error loading image. Try again.';
-      btn.disabled = false;
-      btn.textContent = 'Generate ✦';
-    };
+    // Pollinations can take 20-40s for large resolutions
+    const timeout = setTimeout(() => { newImg.src = ''; done(false); }, 90000);
 
-    img.src = currentUrl;
+    newImg.onload = () => { clearTimeout(timeout); done(true); };
+    newImg.onerror = () => { clearTimeout(timeout); done(false); };
+    newImg.src = currentUrl;
   }
 
   async function downloadImg() {
     if (!currentUrl) return;
     try {
-      const res = await fetch(currentUrl);
+      const res = await fetch(currentUrl, { mode: 'cors' });
       const blob = await res.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
