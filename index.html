@@ -476,12 +476,12 @@
     const seed = Math.floor(Math.random() * 999999);
     const w = currentW, h = currentH;
     return [
-      // Provider 1: Pollinations flux (best quality)
+      // Provider 1: flux — best quality
       `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`,
-      // Provider 2: Pollinations turbo (faster, lower quality)
+      // Provider 2: turbo — much faster, slightly lower quality
       `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed+1}&nologo=true&model=turbo`,
-      // Provider 3: Pollinations with different seed as tie-breaker
-      `https://image.pollinations.ai/prompt/${enc}?width=${Math.min(w,1920)}&height=${Math.min(h,1080)}&seed=${seed+2}&nologo=true&model=flux-realism`,
+      // Provider 3: flux via gen endpoint — different server, avoids same rate limit
+      `https://image.pollinations.ai/prompt/${enc}?width=${w}&height=${h}&seed=${seed+2}&nologo=true&model=flux&nofeed=true`,
     ];
   }
 
@@ -493,26 +493,25 @@
       let failures = 0;
 
       urls.forEach((url, i) => {
-        // Stagger requests slightly to avoid simultaneous rate-limit hits
         setTimeout(() => {
           if (settled) return;
           fetch(url, { signal })
             .then(r => {
+              // 429 = rate limited, treat as soft failure (not a hard error)
+              if (r.status === 429 || r.status === 503) throw new Error(`${r.status}`);
               if (!r.ok) throw new Error(`${r.status}`);
               return r.blob();
             })
             .then(blob => {
-              if (!settled) {
-                settled = true;
-                resolve(blob);
-              }
+              if (!settled) { settled = true; resolve(blob); }
             })
             .catch(err => {
               if (settled) return;
               failures++;
+              // Only reject if ALL providers failed
               if (failures === urls.length) reject(err);
             });
-        }, i * 2000); // stagger: 0s, 2s, 4s
+        }, i * 1500); // stagger: 0s, 1.5s, 3s
       });
     });
   }
