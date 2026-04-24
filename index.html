@@ -567,22 +567,32 @@
     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=turbo`;
 
     try {
-      // 45-second hard timeout — don't let users suffer past this
-      const timeoutId = setTimeout(() => gen.controller.abort(), 45000);
+      // 45-second hard timeout that covers the FULL pipeline (fetch + blob + img decode)
+      const timeoutId = setTimeout(() => {
+        gen.controller.abort();
+      }, 45000);
 
       const response = await fetch(url, { signal: gen.controller.signal });
-      clearTimeout(timeoutId);
 
-      if (gen.cancelled) return;
+      if (gen.cancelled) { clearTimeout(timeoutId); return; }
 
       if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('rate_limit');
-        }
+        clearTimeout(timeoutId);
+        if (response.status === 429) throw new Error('rate_limit');
         throw new Error(`status_${response.status}`);
       }
 
-      const blob = await response.blob();
+      // Race blob() against the abort signal — .blob() can hang forever otherwise
+      const blob = await Promise.race([
+        response.blob(),
+        new Promise((_, reject) => {
+          gen.controller.signal.addEventListener('abort',
+            () => reject(new DOMException('Aborted', 'AbortError')),
+            { once: true });
+        })
+      ]);
+
+      clearTimeout(timeoutId);
       if (gen.cancelled) return;
 
       // Revoke previous blob URL to free memory
@@ -593,13 +603,25 @@
       const blobUrl = URL.createObjectURL(blob);
       currentImgUrl = blobUrl;
 
+      // Also timeout the image decode (rare but possible)
+      const decodeTimeout = setTimeout(() => {
+        if (!img.complete || !img.naturalWidth) {
+          img.src = '';
+          cleanup();
+          loadingText.textContent = 'Image decode failed. Try again.';
+          loadingTimer.textContent = '';
+        }
+      }, 10000);
+
       img.onload = () => {
+        clearTimeout(decodeTimeout);
         if (gen.cancelled) return;
         cleanup();
         loading.classList.add('hidden');
         img.classList.add('loaded');
       };
       img.onerror = () => {
+        clearTimeout(decodeTimeout);
         if (gen.cancelled) return;
         cleanup();
         loadingText.textContent = 'Failed to load image';
