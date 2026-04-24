@@ -443,8 +443,9 @@
 
 <script>
   let currentW = 1920, currentH = 1080;
-  let currentStyle = '';
   let currentUrl = '';
+  let prefetchedBlob = null;   // pre-loaded next image blob
+  let prefetchAbort = null;    // so we can cancel stale prefetch
 
   document.querySelectorAll('.res-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -452,12 +453,14 @@
       btn.classList.add('active');
       currentW = parseInt(btn.dataset.w);
       currentH = parseInt(btn.dataset.h);
+      prefetchedBlob = null; // resolution changed, discard prefetch
     });
   });
 
   document.querySelectorAll('.tag').forEach(tag => {
     tag.addEventListener('click', () => {
       tag.classList.toggle('active');
+      prefetchedBlob = null; // style changed, discard prefetch
     });
   });
 
@@ -469,21 +472,30 @@
     return [...document.querySelectorAll('.tag.active')].map(t => t.textContent).join(', ');
   }
 
-  let activeRequest = null;
+  function buildUrl(prompt) {
+    const styles = getActiveStyles();
+    const full = styles ? `${prompt}, ${styles} style` : prompt;
+    const seed = Math.floor(Math.random() * 999999);
+    return `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
+  }
+
+  function prefetchNext(prompt) {
+    // cancel any existing prefetch
+    if (prefetchAbort) prefetchAbort.abort();
+    prefetchAbort = new AbortController();
+    prefetchedBlob = null;
+    const url = buildUrl(prompt);
+    fetch(url, { signal: prefetchAbort.signal })
+      .then(r => r.ok ? r.blob() : null)
+      .then(blob => { if (blob) prefetchedBlob = blob; })
+      .catch(() => {}); // silent — it's just a prefetch
+  }
+
+  let activeReq = null;
 
   function generate() {
     const promptVal = document.getElementById('prompt').value.trim();
-    if (!promptVal) {
-      document.getElementById('prompt').focus();
-      return;
-    }
-
-    const styles = getActiveStyles();
-    const fullPrompt = styles ? `${promptVal}, ${styles} style` : promptVal;
-    const encoded = encodeURIComponent(fullPrompt);
-    const seed = Math.floor(Math.random() * 999999);
-
-    const apiUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&enhance=true&model=flux`;
+    if (!promptVal) { document.getElementById('prompt').focus(); return; }
 
     const img = document.getElementById('result-img');
     const loading = document.getElementById('loading');
@@ -491,10 +503,9 @@
     const btn = document.getElementById('generate-btn');
     const contentAd = document.getElementById('content-ad');
 
-    // Cancel any previous in-flight request
-    if (activeRequest) activeRequest.cancelled = true;
+    if (activeReq) activeReq.cancelled = true;
     const req = { cancelled: false };
-    activeRequest = req;
+    activeReq = req;
 
     document.getElementById('result-wrap').classList.add('visible');
     loading.classList.remove('hidden');
@@ -506,29 +517,39 @@
     const messages = ['Generating your wallpaper…', 'Running AI model…', 'Almost ready…', 'Rendering final image…'];
     let mi = 0;
     loadingText.textContent = messages[0];
-    const msgTimer = setInterval(() => { mi = (mi+1) % messages.length; loadingText.textContent = messages[mi]; }, 3500);
+    const msgTimer = setInterval(() => { mi=(mi+1)%messages.length; loadingText.textContent=messages[mi]; }, 3500);
+    const reset = () => { clearInterval(msgTimer); btn.disabled=false; btn.textContent='Generate ✦'; };
 
-    const reset = () => { clearInterval(msgTimer); btn.disabled = false; btn.textContent = 'Generate ✦'; };
+    const showBlob = (blob) => {
+      if (req.cancelled) return;
+      const blobUrl = URL.createObjectURL(blob);
+      img.onload = () => {
+        reset();
+        loading.classList.add('hidden');
+        img.classList.add('loaded');
+        contentAd.style.display = 'flex';
+        // Start prefetching the NEXT image in background immediately
+        prefetchNext(promptVal);
+      };
+      img.src = blobUrl;
+      currentUrl = blobUrl;
+    };
 
-    // Fetch as blob — guarantees img.onload always fires fresh, no cache stale issues
+    // If we already have a prefetched blob ready — use it instantly!
+    if (prefetchedBlob) {
+      const blob = prefetchedBlob;
+      prefetchedBlob = null;
+      clearInterval(msgTimer); // no spinner needed
+      showBlob(blob);
+      return;
+    }
+
+    // Otherwise fetch normally
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 90000);
-
-    fetch(apiUrl, { signal: controller.signal })
+    fetch(buildUrl(promptVal), { signal: controller.signal })
       .then(r => { if (!r.ok) throw new Error('bad'); return r.blob(); })
-      .then(blob => {
-        clearTimeout(timeout);
-        if (req.cancelled) return;
-        const blobUrl = URL.createObjectURL(blob);
-        img.onload = () => {
-          reset();
-          loading.classList.add('hidden');
-          img.classList.add('loaded');
-          contentAd.style.display = 'flex';
-        };
-        img.src = blobUrl;
-        currentUrl = blobUrl;
-      })
+      .then(blob => { clearTimeout(timeout); showBlob(blob); })
       .catch(err => {
         clearTimeout(timeout);
         if (req.cancelled) return;
@@ -542,13 +563,10 @@
   async function downloadImg() {
     if (!currentUrl) return;
     try {
-      const res = await fetch(currentUrl, { mode: 'cors' });
-      const blob = await res.blob();
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = currentUrl;
       a.download = `wallgen-ai-${currentW}x${currentH}.jpg`;
       a.click();
-      URL.revokeObjectURL(a.href);
     } catch {
       window.open(currentUrl, '_blank');
     }
